@@ -1,0 +1,33 @@
+[package]
+name = "kreten-desktop"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.90"
+description = "Local-first KRÉTA desktop client with a Rust core"
+authors = ["KRETÉN Desktop contributors"]
+
+[lib]
+name = "kreten_desktop"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+kreten-core = { path = "../crates/kreten-core" }
+tauri = { version = "2", features = ["tray-icon", "image-png"] }
+tauri-plugin-autostart = "2"
+tauri-plugin-notification = "2"
+tauri-plugin-single-instance = "2"
+tauri-plugin-opener = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1", features = ["sync", "time"] }
+chrono = { version = "0.4", features = ["serde"] }
+url = "2"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+[target.'cfg(target_os = "linux")'.dependencies]
+dbus = { version = "0.9", features = ["vendored"] }
+

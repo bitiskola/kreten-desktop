@@ -1,0 +1,68 @@
+name: Desktop checks and packages
+
+on:
+  push:
+    branches: [main, master]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: desktop-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  desktop:
+    name: ${{ matrix.name }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Linux x64
+            os: ubuntu-22.04
+            bundles: deb,appimage
+            artifact: linux-x64
+          - name: Windows x64
+            os: windows-latest
+            bundles: nsis
+            artifact: windows-x64
+          - name: macOS Universal
+            os: macos-latest
+            bundles: dmg
+            artifact: macos-dmg
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+          targets: ${{ matrix.os == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
+      - uses: Swatinem/rust-cache@v2
+      - name: Linux dependencies
+        if: runner.os == 'Linux'
+        run: bash scripts/install-linux-deps.sh
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+      - run: cargo fmt --all -- --check
+      - run: cargo test --workspace --all-targets --locked
+      - run: cargo clippy --workspace --all-targets --locked -- -D warnings
+      - name: Build installer
+        run: npm run tauri build -- --bundles ${{ matrix.bundles }} ${{ matrix.os == 'macos-latest' && '--no-sign' || '' }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: kreten-desktop-${{ matrix.artifact }}
+          path: |
+            target/release/bundle/deb/*.deb
+            target/release/bundle/appimage/*.AppImage
+            target/release/bundle/nsis/*.exe
+            target/release/bundle/dmg/*.dmg
+          if-no-files-found: error
+          retention-days: 14

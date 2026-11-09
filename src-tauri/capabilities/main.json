@@ -1,0 +1,7 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "main-window",
+  "description": "Only the bundled local interface may call desktop commands. The remote OAuth window has no IPC permissions.",
+  "windows": ["main"],
+  "permissions": ["core:default"]
+}
