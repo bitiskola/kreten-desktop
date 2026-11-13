@@ -151,9 +151,9 @@ SEARCH_DIRS=(
 EXE_FILE=""
 for dir in "${SEARCH_DIRS[@]}"; do
   if [[ -d "$dir" ]]; then
-    EXE_FILE="$(find "$dir" -maxdepth 1 -type f -name "*setup*.exe" 2>/dev/null | head -n 1 || true)"
+    EXE_FILE="$(ls -1t "$dir"/*setup*.exe 2>/dev/null | head -n 1 || true)"
     if [[ -z "$EXE_FILE" ]]; then
-      EXE_FILE="$(find "$dir" -maxdepth 1 -type f -name "*.exe" 2>/dev/null | head -n 1 || true)"
+      EXE_FILE="$(ls -1t "$dir"/*.exe 2>/dev/null | head -n 1 || true)"
     fi
     if [[ -n "$EXE_FILE" && -f "$EXE_FILE" ]]; then
       break

@@ -238,7 +238,7 @@ SEARCH_DIRS=(
 DMG_FILE=""
 for dir in "${SEARCH_DIRS[@]}"; do
   if [[ -d "$dir" ]]; then
-    DMG_FILE="$(find "$dir" -maxdepth 1 -type f -name "*.dmg" 2>/dev/null | head -n 1 || true)"
+    DMG_FILE="$(ls -1t "$dir"/*.dmg 2>/dev/null | head -n 1 || true)"
     if [[ -n "$DMG_FILE" && -f "$DMG_FILE" ]]; then
       break
     fi

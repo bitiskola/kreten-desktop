@@ -3,6 +3,12 @@
   src: local("Inter"), local("Segoe UI"), local("Ubuntu");
   font-display: swap;
 }
+html,
+body {
+  /* No elastic overscroll: WebView2 (Windows) and WKWebView (macOS) would
+     otherwise pull the page away from the window edges and reveal blank corners. */
+  overscroll-behavior: none;
+}
 :root {
   font-family:
     LocalUI,
@@ -11,7 +17,7 @@
     "Segoe UI",
     sans-serif;
   color: #25344b;
-  background: #edf2f9;
+  background: var(--bg);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -3745,4 +3751,64 @@ h3,
 
 .past-exam {
   opacity: 0.82;
+}
+
+/* Parallel lessons in the same period (split groups) sit next to each other. */
+.lesson-slot {
+  cursor: default;
+}
+.lesson-slot:hover {
+  background: none;
+}
+.lesson-slot.active:hover {
+  background: var(--accent-soft);
+}
+.lesson-parallel {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 8px;
+}
+.lesson-choice {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+  min-width: 0;
+  padding: 8px 10px;
+  text-align: left;
+  background: var(--surface-soft);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+.lesson-choice:hover {
+  background: var(--surface-hover);
+}
+.lesson-choice.active {
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+  background: var(--accent-soft);
+}
+.lesson-choice-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.lesson-choice .lesson-room {
+  align-self: flex-start;
+}
+.timetable-slot {
+  display: grid;
+  grid-template-columns: repeat(var(--slot-count, 2), minmax(0, 1fr));
+  gap: 6px;
+}
+.timetable-slot .timetable-lesson {
+  min-width: 0;
+  padding: 12px 8px;
+}
+.timetable-slot .timetable-lesson .row {
+  flex-wrap: wrap;
+}
+.timetable-slot .timetable-lesson > strong {
+  overflow-wrap: anywhere;
 }

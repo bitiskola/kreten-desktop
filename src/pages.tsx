@@ -41,6 +41,7 @@ import {
   lessons,
   schoolTimestamp,
   lessonIntervals,
+  lessonSlots,
   currentLiveStatus,
   noteRows,
   isJegyCode,
@@ -67,7 +68,7 @@ import {
   Empty,
   GradeBadge,
   Header,
-  LessonRow,
+  LessonSlot,
   Modal,
   Private,
   Stat,
@@ -249,12 +250,12 @@ export function Dashboard() {
             className="schedule-card"
           >
             {schedule.length ? (
-              schedule.map((l) => (
-                <LessonRow
-                  key={l.id}
-                  lesson={l}
-                  active={l.id === activeLesson?.id}
-                  onClick={() => setDetail(l)}
+              lessonSlots(schedule).map((slot) => (
+                <LessonSlot
+                  key={slot.map((l) => l.id).join("+")}
+                  slot={slot}
+                  activeId={activeLesson?.id}
+                  onOpen={setDetail}
                 />
               ))
             ) : (
@@ -509,31 +510,29 @@ export function Timetable() {
               {day === today() && <span className="badge">{t("Ma")}</span>}
             </header>
             <div className="stack">
-              {all
-                .filter((l) => l.date === day)
-                .map((l) => (
-                  <button
-                    key={l.id}
-                    className={`timetable-lesson card ${l.cancelled ? "cancelled" : ""}`}
-                    onClick={() => setDetail(l)}
+              {lessonSlots(all.filter((l) => l.date === day)).map((slot) =>
+                slot.length === 1 ? (
+                  <TimetableLesson
+                    key={slot[0].id}
+                    lesson={slot[0]}
+                    onOpen={setDetail}
+                  />
+                ) : (
+                  <div
+                    key={slot.map((l) => l.id).join("+")}
+                    className="timetable-slot"
+                    role="group"
+                    aria-label={t("{n} párhuzamos óra", undefined, {
+                      n: slot.length,
+                    })}
+                    style={{ "--slot-count": slot.length } as React.CSSProperties}
                   >
-                    <div className="row">
-                      <span className="lesson-number">{l.number}</span>
-                      <span className="small muted">
-                        {timeLabel(l.start)}–{timeLabel(l.end)}
-                      </span>
-                    </div>
-                    <strong>{l.subject}</strong>
-                    <span className="muted small">
-                      {l.substitute || l.teacher}
-                    </span>
-                    <span className="room-line">
-                      <MapPin size={12} />
-                      {l.room || "—"}
-                      {l.cancelled && " · Elmarad"}
-                    </span>
-                  </button>
-                ))}
+                    {slot.map((l) => (
+                      <TimetableLesson key={l.id} lesson={l} onOpen={setDetail} />
+                    ))}
+                  </div>
+                ),
+              )}
               {!all.some((l) => l.date === day) && (
                 <div className="day-empty">
                   {loading ? t("Betöltés…") : t("Nincs tanóra")}
@@ -547,6 +546,34 @@ export function Timetable() {
         <LessonDetail lesson={detail} onClose={() => setDetail(null)} />
       )}
     </>
+  );
+}
+function TimetableLesson({
+  lesson: l,
+  onOpen,
+}: {
+  lesson: Lesson;
+  onOpen: (lesson: Lesson) => void;
+}) {
+  return (
+    <button
+      className={`timetable-lesson card ${l.cancelled ? "cancelled" : ""}`}
+      onClick={() => onOpen(l)}
+    >
+      <div className="row">
+        <span className="lesson-number">{l.number}</span>
+        <span className="small muted">
+          {timeLabel(l.start)}–{timeLabel(l.end)}
+        </span>
+      </div>
+      <strong>{l.subject}</strong>
+      <span className="muted small">{l.substitute || l.teacher}</span>
+      <span className="room-line">
+        <MapPin size={12} />
+        {l.room || "—"}
+        {l.cancelled && " · Elmarad"}
+      </span>
+    </button>
   );
 }
 function SearchField({

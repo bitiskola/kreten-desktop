@@ -87,7 +87,24 @@ export function demoSnapshot(): Snapshot {
             ],
             Allapot: { Nev: "Tervezett" },
           };
-        }),
+        }).concat(
+          // A split-group 7th lesson: both groups have class at the same time.
+          [
+            ["Angol nyelv · 1. csoport", "Szabó Eszter", "214"],
+            ["Német nyelv · 2. csoport", "Kovács Dániel", "118"],
+          ].map(([subject, teacher, room], g) => ({
+            Uid: `lesson-${d}-7-${g}`,
+            Datum: d,
+            Tantargy: { Nev: subject },
+            KezdetIdopont: `${d}T14:00:00`,
+            VegIdopont: `${d}T14:45:00`,
+            Oraszam: 7,
+            TanarNeve: teacher,
+            TeremNeve: room,
+            Tema: "Csoportbontás",
+            Allapot: { Nev: "Tervezett" },
+          })),
+        ),
       ),
     homework: [
       {

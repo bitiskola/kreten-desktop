@@ -171,7 +171,7 @@ npm run tauri build -- --bundles deb "${EXTRA_ARGS[@]}"
 
 # 7. Locate generated .deb
 DEB_DIR="target/$MODE_DIR/bundle/deb"
-DEB_FILE="$(find "$DEB_DIR" -maxdepth 1 -type f -name "*.deb" 2>/dev/null | head -n 1 || true)"
+DEB_FILE="$(ls -1t "$DEB_DIR"/*.deb 2>/dev/null | head -n 1 || true)"
 
 if [[ -z "$DEB_FILE" || ! -f "$DEB_FILE" ]]; then
   error "Build completed but .deb file was not found in $DEB_DIR."

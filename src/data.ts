@@ -182,6 +182,29 @@ export function lessons(data: unknown): Lesson[] {
     }))
     .sort((a, b) => a.start.localeCompare(b.start));
 }
+/**
+ * Groups lessons that share a period on the same day (split classes, parallel
+ * groups, a cancelled lesson and its replacement) so they can be shown side by
+ * side. Lessons belong together when they have the same lesson number or their
+ * times overlap.
+ */
+export function lessonSlots(items: Lesson[]): Lesson[][] {
+  const span = (l: Lesson) => [schoolTimestamp(l.start), schoolTimestamp(l.end)];
+  const together = (a: Lesson, b: Lesson) => {
+    if (a.date !== b.date) return false;
+    if (a.number && a.number === b.number) return true;
+    const [as, ae] = span(a),
+      [bs, be] = span(b);
+    return [as, ae, bs, be].every(Number.isFinite) && as < be && bs < ae;
+  };
+  const slots: Lesson[][] = [];
+  for (const lesson of items) {
+    const slot = slots.find((s) => s.some((o) => together(o, lesson)));
+    if (slot) slot.push(lesson);
+    else slots.push([lesson]);
+  }
+  return slots;
+}
 export function lessonStatus(items: Lesson[], now: Date) {
   const active = items.find(
     (l) =>
@@ -449,7 +472,7 @@ export function lessonIntervals(lessonsList: Lesson[]): LiveLessonInterval[] {
           end: endMs,
           date: l.date,
           subject: l.subject || "Tanóra",
-          time: `${l.start.slice(11, 16)} – ${l.end.slice(11, 16)}`,
+          time: `${timeLabel(l.start)} – ${timeLabel(l.end)}`,
           classroom: l.room || "Terem nincs megadva",
           teacher: l.substitute || l.teacher || "",
         });

@@ -225,6 +225,68 @@ export function LessonRow({
     </button>
   );
 }
+/** One period of the day; parallel lessons (split groups) are shown next to each other. */
+export function LessonSlot({
+  slot,
+  activeId,
+  onOpen,
+}: {
+  slot: Lesson[];
+  activeId?: string;
+  onOpen: (lesson: Lesson) => void;
+}) {
+  if (slot.length === 1)
+    return (
+      <LessonRow
+        lesson={slot[0]}
+        active={slot[0].id === activeId}
+        onClick={() => onOpen(slot[0])}
+      />
+    );
+  const start = slot.map((l) => l.start).sort()[0];
+  const end = slot.map((l) => l.end).sort()[slot.length - 1];
+  const number = slot.find((l) => l.number)?.number;
+  return (
+    <div
+      className={`lesson-row lesson-slot ${slot.some((l) => l.id === activeId) ? "active" : ""}`}
+      role="group"
+      aria-label={t("{n} párhuzamos óra", undefined, { n: slot.length })}
+    >
+      <span className="lesson-number">{number || "·"}</span>
+      <div className="lesson-time">
+        {timeLabel(start)}
+        <small>{timeLabel(end)}</small>
+      </div>
+      <div className="lesson-parallel">
+        {slot.map((l) => (
+          <button
+            key={l.id}
+            className={`lesson-choice ${l.id === activeId ? "active" : ""} ${l.cancelled ? "cancelled" : ""}`}
+            onClick={() => onOpen(l)}
+          >
+            <span className="lesson-main">
+              <strong>{l.subject}</strong>
+              <span>
+                {l.substitute ? `Helyettesítés: ${l.substitute}` : l.teacher}
+              </span>
+            </span>
+            <span className="lesson-choice-meta">
+              <span className="lesson-room">
+                <MapPin size={12} />
+                {l.room || "—"}
+              </span>
+              {l.cancelled ? (
+                <span className="badge warning">{t("Elmarad")}</span>
+              ) : (
+                l.id === activeId && <span className="live-dot" />
+              )}
+            </span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
 export function Modal({
   title,
   children,

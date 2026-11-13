@@ -7,6 +7,9 @@ import {
   dateLabel,
   grades,
   homeworkRows,
+  currentLiveStatus,
+  lessonIntervals,
+  lessonSlots,
   lessons,
   lessonStatus,
   localDay,
@@ -382,5 +385,42 @@ describe("user requested features & regressions", () => {
     expect(status.title).toBe("Biológia");
     expect(status.progress).toBe(50);
     expect(status.remaining).toBe("0 perc 50 mp van hátra");
+  });
+});
+
+describe("live lesson card and parallel lessons", () => {
+  // KRÉTA sends lesson times in UTC: 07:00Z is 08:00 in Budapest in winter.
+  const lesson = (uid: string, n: number, start: string, end: string, subject = uid) => ({
+    Uid: uid,
+    Oraszam: n,
+    Nev: subject,
+    Datum: "2026-11-12T00:00:00Z",
+    KezdetIdopont: start,
+    VegIdopont: end,
+  });
+
+  it("shows the same Budapest start time as the lesson list", () => {
+    const list = lessons([lesson("a", 1, "2026-11-12T07:00:00Z", "2026-11-12T07:45:00Z")]);
+    const status = currentLiveStatus(
+      lessonIntervals(list),
+      Date.parse("2026-11-12T06:30:00Z"),
+    );
+    expect(status.kind).toBe("upcoming");
+    expect(status.details).toContain("08:00 – 08:45");
+    expect(timeLabel(list[0].start)).toBe("08:00");
+  });
+
+  it("groups lessons that share a period", () => {
+    const list = lessons([
+      lesson("a", 6, "2026-11-12T11:50:00Z", "2026-11-12T12:35:00Z"),
+      lesson("b", 7, "2026-11-12T12:45:00Z", "2026-11-12T13:30:00Z", "Angol 1"),
+      lesson("c", 7, "2026-11-12T12:45:00Z", "2026-11-12T13:30:00Z", "Angol 2"),
+      // Same time, but missing lesson number: grouped by overlap.
+      lesson("d", 0, "2026-11-12T12:50:00Z", "2026-11-12T13:30:00Z", "Német"),
+    ]);
+    expect(lessonSlots(list).map((slot) => slot.map((l) => l.id))).toEqual([
+      ["a"],
+      ["b", "c", "d"],
+    ]);
   });
 });

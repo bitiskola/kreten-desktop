@@ -160,9 +160,9 @@ $SearchDirs = @(
 $InstallerFile = $null
 foreach ($dir in $SearchDirs) {
     if (Test-Path $dir) {
-        $found = Get-ChildItem -Path $dir -Filter "*setup*.exe" -File -ErrorAction SilentlyContinue | Select-Object -First 1
+        $found = Get-ChildItem -Path $dir -Filter "*setup*.exe" -File -ErrorAction SilentlyContinue | Sort-Object LastWriteTime -Descending | Select-Object -First 1
         if (-not $found) {
-            $found = Get-ChildItem -Path $dir -Filter "*.exe" -File -ErrorAction SilentlyContinue | Select-Object -First 1
+            $found = Get-ChildItem -Path $dir -Filter "*.exe" -File -ErrorAction SilentlyContinue | Sort-Object LastWriteTime -Descending | Select-Object -First 1
         }
         if ($found) {
             $InstallerFile = $found.FullName
