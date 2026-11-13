@@ -294,7 +294,7 @@ export default function App() {
     setPage(next);
     setMobileMenu(false);
     document.getElementById("main-content")?.scrollTo(0, 0);
-    window.scrollTo(0, 0);
+    document.getElementById("root")?.scrollTo(0, 0);
   }, []);
   async function refresh() {
     if (demo) {
@@ -312,7 +312,7 @@ export default function App() {
   function enterDemo() {
     modeGeneration.current++;
     demoRef.current = true;
-    window.scrollTo(0, 0);
+    document.getElementById("root")?.scrollTo(0, 0);
     setDemo(true);
     update(demoSnapshot());
     setPage("dashboard");

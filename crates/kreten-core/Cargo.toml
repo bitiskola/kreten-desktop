@@ -1,6 +1,6 @@
 [package]
 name = "kreten-core"
-version = "0.2.0"
+version = "0.2.1"
 edition = "2021"
 license = "CC-BY-NC-SA-4.0"
 description = "Local-first KRÉTA mobile API and session engine for KRETÉN Desktop"

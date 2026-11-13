@@ -5,9 +5,12 @@
 }
 html,
 body {
-  /* No elastic overscroll: WebView2 (Windows) and WKWebView (macOS) would
-     otherwise pull the page away from the window edges and reveal blank corners. */
-  overscroll-behavior: none;
+  /* The document itself never scrolls; #root does. Otherwise WebView2 (Windows)
+     and WKWebView (macOS) rubber-band the whole page away from the window edges
+     and reveal blank corners. `overscroll-behavior` is not used on purpose:
+     WebKitGTK 2.52 stops wheel scrolling when it is set on the root. */
+  height: 100%;
+  overflow: hidden;
 }
 :root {
   font-family:
@@ -139,7 +142,8 @@ body::before {
 }
 #root {
   isolation: isolate;
-  min-height: 100vh;
+  height: 100%;
+  overflow: auto;
 }
 button,
 input,
